@@ -30,10 +30,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.type.TypeReference;
-import org.jfrog.build.api.dependency.BuildPatternArtifacts;
-import org.jfrog.build.api.dependency.BuildPatternArtifactsRequest;
-import org.jfrog.build.api.dependency.PatternResultFileSet;
-import org.jfrog.build.api.dependency.PropertySearchResult;
+import org.jfrog.build.api.dependency.*;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ArtifactoryHttpClient;
 import org.jfrog.build.client.PreemptiveHttpClient;
@@ -49,35 +46,11 @@ import java.util.List;
  *
  * @author Noam Y. Tenne
  */
-public class ArtifactoryDependenciesClient {
-
-    private String artifactoryUrl;
-
-    private ArtifactoryHttpClient httpClient;
+public class ArtifactoryDependenciesClient extends ArtifactoryBaseClient{
 
     public ArtifactoryDependenciesClient(String artifactoryUrl, String username, String password, Log logger) {
-        this.artifactoryUrl = StringUtils.stripEnd(artifactoryUrl, "/");
-        httpClient = new ArtifactoryHttpClient(this.artifactoryUrl, username, password, logger);
+        super(artifactoryUrl, username, password, logger);
     }
-
-    public void setConnectionTimeout(int connectionTimeout) {
-        httpClient.setConnectionTimeout(connectionTimeout);
-    }
-
-    public void setProxyConfiguration(String host, int port) {
-        httpClient.setProxyConfiguration(host, port, null, null);
-    }
-
-    public void setProxyConfiguration(String host, int port, String username, String password) {
-        httpClient.setProxyConfiguration(host, port, username, password);
-    }
-
-    public void shutdown() {
-        if (httpClient != null) {
-            httpClient.shutdown();
-        }
-    }
-
 
     /**
      * Retrieves list of {@link org.jfrog.build.api.dependency.BuildPatternArtifacts} for build dependencies specified.
@@ -101,7 +74,6 @@ public class ArtifactoryDependenciesClient {
                 "Failed to retrieve build artifacts report");
         return artifacts;
     }
-
 
     public PatternResultFileSet searchArtifactsByPattern(String pattern) throws IOException {
         PreemptiveHttpClient client = httpClient.getHttpClient();
