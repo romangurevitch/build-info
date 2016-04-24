@@ -13,6 +13,7 @@ import org.jfrog.build.api.dependency.pattern.BuildDependencyPattern;
 import org.jfrog.build.api.dependency.pattern.DependencyPattern;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.extractor.clientConfiguration.*;
+import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenciesClient;
 
 import java.io.IOException;
 import java.util.Collections;

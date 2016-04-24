@@ -29,8 +29,11 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.map.DeserializationConfig;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.jfrog.build.api.dependency.*;
+import org.jfrog.build.api.search.AqlSearchResult;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ArtifactoryHttpClient;
 import org.jfrog.build.client.PreemptiveHttpClient;
@@ -46,7 +49,7 @@ import java.util.List;
  *
  * @author Noam Y. Tenne
  */
-public class ArtifactoryDependenciesClient extends ArtifactoryBaseClient{
+public class ArtifactoryDependenciesClient extends ArtifactoryBaseClient {
 
     public ArtifactoryDependenciesClient(String artifactoryUrl, String username, String password, Log logger) {
         super(artifactoryUrl, username, password, logger);
@@ -71,7 +74,8 @@ public class ArtifactoryDependenciesClient extends ArtifactoryBaseClient{
         List<BuildPatternArtifacts> artifacts = readResponse(httpClient.getHttpClient().execute(post),
                 new TypeReference<List<BuildPatternArtifacts>>() {
                 },
-                "Failed to retrieve build artifacts report");
+                "Failed to retrieve build artifacts report",
+                false);
         return artifacts;
     }
 
@@ -82,7 +86,8 @@ public class ArtifactoryDependenciesClient extends ArtifactoryBaseClient{
         PatternResultFileSet result = readResponse(client.execute(new HttpGet(url)),
                 new TypeReference<PatternResultFileSet>() {
                 },
-                "Failed to search artifact by the pattern '" + pattern + "'");
+                "Failed to search artifact by the pattern '" + pattern + "'",
+                false);
         return result;
     }
 
@@ -93,9 +98,27 @@ public class ArtifactoryDependenciesClient extends ArtifactoryBaseClient{
         PropertySearchResult result = readResponse(client.execute(new HttpGet(url)),
                 new TypeReference<PropertySearchResult>() {
                 },
-                "Failed to search artifact by the properties '" + properties + "'");
+                "Failed to search artifact by the properties '" + properties + "'",
+                false);
         return result;
     }
+
+    public AqlSearchResult searchArtifactsByAql(String aql) throws IOException {
+        PreemptiveHttpClient client = httpClient.getHttpClient();
+
+        String url = artifactoryUrl + "/api/search/aql";
+        HttpPost httpPost = new HttpPost(url);
+        StringEntity entity = new StringEntity(aql);
+        httpPost.setEntity(entity);
+        AqlSearchResult result = readResponse(client.execute(httpPost),
+                new TypeReference<AqlSearchResult>() {
+                },
+                "Failed to search artifact by the aql '" + aql + "'",
+                true);
+        return result;
+    }
+
+
 
 
     /**
@@ -108,7 +131,7 @@ public class ArtifactoryDependenciesClient extends ArtifactoryBaseClient{
      * @return response object converted from HTTP Json reponse to the type specified.
      * @throws java.io.IOException if reading or converting response fails.
      */
-    private <T> T readResponse(HttpResponse response, TypeReference<T> valueType, String errorMessage)
+    private <T> T readResponse(HttpResponse response, TypeReference<T> valueType, String errorMessage, boolean ignorMissingFields)
             throws IOException {
 
         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
@@ -122,6 +145,9 @@ public class ArtifactoryDependenciesClient extends ArtifactoryBaseClient{
             try {
                 content = entity.getContent();
                 JsonParser parser = httpClient.createJsonParser(content);
+                if (ignorMissingFields) {
+                    ((ObjectMapper) parser.getCodec()).configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                }
                 // http://wiki.fasterxml.com/JacksonDataBinding
                 return parser.readValueAs(valueType);
             } finally {
