@@ -2,6 +2,7 @@ package org.jfrog.build.extractor.clientConfiguration.util;
 
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
+import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.api.dependency.DownloadableArtifact;
 import org.jfrog.build.api.dependency.pattern.PatternType;
@@ -14,40 +15,38 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Created by Tamirh on 24/04/2016.
+ * Created by Tamirh on 25/04/2016.
  */
-public class AqlBuildDependenciesHelper {
+public class AqlDependenciesHelper implements DependenciesHelper {
 
     private DependenciesDownloader downloader;
     private Log log;
     private String artifactoryUrl;
     private String target;
 
-    public AqlBuildDependenciesHelper(DependenciesDownloader downloader, Log log) {
+    public AqlDependenciesHelper(DependenciesDownloader downloader, Log log) {
         this.downloader = downloader;
         this.log = log;
         this.artifactoryUrl = "";
         this.target = "";
     }
 
-    public AqlBuildDependenciesHelper(DependenciesDownloader downloader, String artifactoryUrl, String target, Log log) {
-            this.downloader = downloader;
-            this.log = log;
-            this.artifactoryUrl = artifactoryUrl;
-            this.target = target;
-        }
+    public AqlDependenciesHelper(DependenciesDownloader downloader, String artifactoryUrl, String target, Log log) {
+        this.downloader = downloader;
+        this.log = log;
+        this.artifactoryUrl = artifactoryUrl;
+        this.target = target;
+    }
 
-    public List<BuildDependency> retrieveBuildDependencies(String aqlResolve)
+    public List<Dependency> retrievePublishedDependencies(String resolvePattern)
             throws IOException, InterruptedException {
-        if (StringUtils.isBlank(aqlResolve)) {
+        if (StringUtils.isBlank(resolvePattern)) {
             return Collections.emptyList();
         }
-        log.info("Beginning to resolve Build Info build dependencies.");
-        downloader.download(
-                collectArtifactsToDownload(aqlResolve));
-        log.info("Finished resolving Build Info build dependencies.");
-
-        return Collections.EMPTY_LIST;
+        log.info("Beginning to resolve Build Info published dependencies.");
+        List<Dependency> dependencies = downloader.download(collectArtifactsToDownload(resolvePattern));
+        log.info("Finished resolving Build Info published dependencies.");
+        return dependencies;
     }
 
     private Set<DownloadableArtifact> collectArtifactsToDownload(String aql) {
@@ -78,5 +77,4 @@ public class AqlBuildDependenciesHelper {
     public String getArtifactoryUrl() {
         return artifactoryUrl;
     }
-
 }

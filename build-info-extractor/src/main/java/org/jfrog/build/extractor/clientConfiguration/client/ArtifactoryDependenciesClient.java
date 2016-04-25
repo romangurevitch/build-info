@@ -118,9 +118,6 @@ public class ArtifactoryDependenciesClient extends ArtifactoryBaseClient {
         return result;
     }
 
-
-
-
     /**
      * Reads HTTP response and converts it to object of the type specified.
      *
