@@ -71,11 +71,7 @@ public class ArtifactoryBuildInfoClient extends ArtifactoryBaseClient{
     private static final String BUILD_REST_URL = "/api/build";
     private static final String BUILD_BROWSE_URL = "/webapp/builds";
     private static final int CHECKSUM_DEPLOY_MIN_FILE_SIZE = 10240; // Try checksum deploy of files greater than 10KB
-    /**
-     * The http client used for deploying artifacts and build info. Created and cached on the first deploy request.
-     */
-    private ArtifactoryHttpClient httpClient;
-    private String artifactoryUrl;
+
     /**
      * Version of Artifactory we work with.
      */
