@@ -17,19 +17,29 @@ public class WildcardDependenciesHelper implements DependenciesHelper {
     private String artifactoryUrl;
     private String target;
 
-    public WildcardDependenciesHelper(DependenciesDownloader downloader, Log log) {
-        this.downloader = downloader;
-        this.log = log;
-        this.artifactoryUrl = "";
-        this.target = "";
-    }
-
     public WildcardDependenciesHelper(DependenciesDownloader downloader, String artifactoryUrl, String target, Log log) {
         this.downloader = downloader;
         this.log = log;
         this.artifactoryUrl = artifactoryUrl;
         this.target = target;
     }
+
+    public String getArtifactoryUrl() {
+        return artifactoryUrl;
+    }
+
+    public void setArtifactoryUrl(String artifactoryUrl) {
+        this.artifactoryUrl = artifactoryUrl;
+    }
+
+    public String getTarget() {
+        return target;
+    }
+
+    public void setTarget(String target) {
+        this.target = target;
+    }
+
     public List<Dependency> retrievePublishedDependencies(String searchPattern)
             throws IOException, InterruptedException {
         DependenciesHelper dependenciesHelper = new AqlDependenciesHelper(downloader, artifactoryUrl, target, log);
@@ -54,21 +64,21 @@ public class WildcardDependenciesHelper implements DependenciesHelper {
 
         String json =
                 "{" +
-                        "\"repo\": \"" + repo + "\"," +
-                        buildPropsQuery(props) +
-                        "\"$or\": [";
+                    "\"repo\": \"" + repo + "\"," +
+                    buildPropsQuery(props) +
+                    "\"$or\": [";
 
         if (size == 0) {
             json +=
                     "{" +
-                            buildInnerQuery(".", searchPattern) +
-                            "}";
+                        buildInnerQuery(".", searchPattern) +
+                    "}";
         } else {
             for (int i = 0; i < size; i++) {
                 json +=
                         "{" +
-                                buildInnerQuery(pairs.get(i).getPath(), pairs.get(i).getFile()) +
-                                "}";
+                            buildInnerQuery(pairs.get(i).getPath(), pairs.get(i).getFile()) +
+                        "}";
 
                 if (i + 1 < size) {
                     json += ",";
@@ -112,7 +122,7 @@ public class WildcardDependenciesHelper implements DependenciesHelper {
         return query;
     }
 
-    private String buildInnerQuery(String path, String name ) {
+    private String buildInnerQuery(String path, String name) {
         return "\"$and\": [{" +
                 "\"path\": {" +
                 "\"$match\":" + "\"" + path + "\"" +
@@ -155,8 +165,8 @@ public class WildcardDependenciesHelper implements DependenciesHelper {
             pairs.add(new PathFilePair(".", pattern));
             path = "";
             name = pattern;
-        } else{
-            if (slashIndex >=0) {
+        } else {
+            if (slashIndex >= 0) {
                 path = pattern.substring(0, slashIndex);
                 name = pattern.substring(slashIndex + 1);
                 pairs.add(new PathFilePair(path, name));
@@ -179,7 +189,7 @@ public class WildcardDependenciesHelper implements DependenciesHelper {
             if (i + 1 < size) {
                 options.add(sections[i] + "*/");
             }
-            for(String option :options) {
+            for (String option : options) {
                 String str = "";
                 for (int j = 0; j < size; j++) {
                     if (j > 0) {
@@ -206,7 +216,7 @@ public class WildcardDependenciesHelper implements DependenciesHelper {
         return pairs;
     }
 
-    private class PathFilePair{
+    private class PathFilePair {
         private String path;
         private String file;
 

@@ -24,13 +24,6 @@ public class AqlDependenciesHelper implements DependenciesHelper {
     private String artifactoryUrl;
     private String target;
 
-    public AqlDependenciesHelper(DependenciesDownloader downloader, Log log) {
-        this.downloader = downloader;
-        this.log = log;
-        this.artifactoryUrl = "";
-        this.target = "";
-    }
-
     public AqlDependenciesHelper(DependenciesDownloader downloader, String artifactoryUrl, String target, Log log) {
         this.downloader = downloader;
         this.log = log;
