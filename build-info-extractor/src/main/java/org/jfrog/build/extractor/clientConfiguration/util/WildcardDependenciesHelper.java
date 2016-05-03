@@ -40,6 +40,7 @@ public class WildcardDependenciesHelper implements DependenciesHelper {
         this.target = target;
     }
 
+    @Override
     public List<Dependency> retrievePublishedDependencies(String searchPattern)
             throws IOException, InterruptedException {
         DependenciesHelper dependenciesHelper = new AqlDependenciesHelper(downloader, artifactoryUrl, target, log);
@@ -50,6 +51,11 @@ public class WildcardDependenciesHelper implements DependenciesHelper {
             throws IOException, InterruptedException {
         DependenciesHelper dependenciesHelper = new AqlDependenciesHelper(downloader, artifactoryUrl, target, log);
         return dependenciesHelper.retrievePublishedDependencies(buildAqlSearchQuery(searchPattern, recursive, props));
+    }
+
+    @Override
+    public void setFlatDownload(boolean flat){
+        this.downloader.setFlatDownload(flat);
     }
 
     public String buildAqlSearchQuery(String searchPattern, boolean recursive, String props) {
@@ -131,8 +137,6 @@ public class WildcardDependenciesHelper implements DependenciesHelper {
                 "\"$match\":" + "\"" + name + "\"" +
                 "}" +
                 "}]";
-
-
     }
 
     // We need to translate the provided download pattern to an AQL query.

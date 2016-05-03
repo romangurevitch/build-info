@@ -31,6 +31,7 @@ public class AqlDependenciesHelper implements DependenciesHelper {
         this.target = target;
     }
 
+    @Override
     public List<Dependency> retrievePublishedDependencies(String resolvePattern)
             throws IOException, InterruptedException {
         if (StringUtils.isBlank(resolvePattern)) {
@@ -42,19 +43,22 @@ public class AqlDependenciesHelper implements DependenciesHelper {
         return dependencies;
     }
 
+    @Override
+    public void setFlatDownload(boolean flat){
+        this.downloader.setFlatDownload(flat);
+    }
+
     private Set<DownloadableArtifact> collectArtifactsToDownload(String aql) {
         Set<DownloadableArtifact> downloadableArtifacts = Sets.newHashSet();
         try{
             AqlSearchResult aqlSearchResult = downloader.getClient().searchArtifactsByAql(aql);
             List<AqlSearchResult.SearchEntry> searchResults = aqlSearchResult.getResults();
-            for(AqlSearchResult.SearchEntry searchEntry : searchResults)   {
+            for (AqlSearchResult.SearchEntry searchEntry : searchResults) {
                 downloadableArtifacts.add(new DownloadableArtifact(StringUtils.stripEnd(artifactoryUrl, "/") + "/" + searchEntry.getRepo(), target, searchEntry.getPath() + "/" + searchEntry.getName(), "", "", PatternType.NORMAL));
             }
-        }
-        catch (IOException e){
+        } catch (IOException e){
             log.info("Failed to execute aql search");
-        }
-        finally {
+        } finally {
             return downloadableArtifacts;
         }
     }

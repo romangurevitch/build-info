@@ -20,17 +20,29 @@ class DependenciesDownloaderImpl implements DependenciesDownloader {
 
     String workspace 
     BuildInfoLog buildInfoLog 
-    ArtifactoryDependenciesClient client 
+    ArtifactoryDependenciesClient client
+    boolean flatDownload
 
     DependenciesDownloaderImpl(ArtifactoryDependenciesClient client, String workspace, BuildInfoLog buildInfoLog) {
         this.client = client
         this.workspace = workspace
         this.buildInfoLog = buildInfoLog
+        this.flatDownload = false
     }
 
     @Override
     ArtifactoryDependenciesClient getClient() {
         return client
+    }
+
+    @Override
+    void setFlatDownload(boolean flat){
+        this.flatDownload = flat
+    }
+
+    @Override
+    boolean getFlatDownload(){
+        return this.flatDownload
     }
 
     @Override
@@ -41,7 +53,8 @@ class DependenciesDownloaderImpl implements DependenciesDownloader {
 
     @Override
     String getTargetDir(String targetDir, String relativeDir) throws IOException {
-        return FilenameUtils.concat(FilenameUtils.concat(workspace, targetDir), relativeDir)
+        String downloadRelativeDir = "" ;//this.flatDownload ? "" : relativeDir;
+        return FilenameUtils.concat(FilenameUtils.concat(workspace, targetDir), downloadRelativeDir)
     }
 
     @Override

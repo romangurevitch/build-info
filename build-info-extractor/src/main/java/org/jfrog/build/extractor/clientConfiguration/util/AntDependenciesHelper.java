@@ -25,7 +25,7 @@ import java.util.Set;
  *
  * @author Shay Yaakov
  */
-public class AntDependenciesHelper {
+public class AntDependenciesHelper implements DependenciesHelper {
 
     private DependenciesDownloader downloader;
     private Log log;
@@ -53,6 +53,11 @@ public class AntDependenciesHelper {
         dependencies = downloader.download(collectArtifactsToDownload(patternLines));
         log.info("Finished resolving Build Info dependencies.");
         return dependencies;
+    }
+
+    // We don't have flat download option for Ant pattern
+    public void setFlatDownload(boolean flat){
+
     }
 
     private Set<DownloadableArtifact> collectArtifactsToDownload(List<String> patternLines)

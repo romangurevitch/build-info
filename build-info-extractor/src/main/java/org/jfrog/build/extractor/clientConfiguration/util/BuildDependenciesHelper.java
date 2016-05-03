@@ -31,7 +31,6 @@ import org.jfrog.build.api.dependency.PatternResult;
 import org.jfrog.build.api.dependency.pattern.BuildDependencyPattern;
 import org.jfrog.build.api.dependency.pattern.DependencyPattern;
 import org.jfrog.build.api.util.Log;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenciesClient;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -71,7 +70,7 @@ public class BuildDependenciesHelper {
         log.info("Beginning to resolve Build Info build dependencies.");
         Map<String, Map<String, List<BuildDependencyPattern>>> buildDependencies = getBuildDependencies(patternLines);
         List<BuildPatternArtifactsRequest> artifactsRequests = toArtifactsRequests(buildDependencies);
-        List<BuildPatternArtifacts> artifactsResponses = ((ArtifactoryDependenciesClient) downloader.getClient()).retrievePatternArtifacts(
+        List<BuildPatternArtifacts> artifactsResponses = downloader.getClient().retrievePatternArtifacts(
                 artifactsRequests);
         Set<BuildDependency> result = Sets.newHashSet();
         downloader.download(

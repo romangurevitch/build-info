@@ -10,4 +10,5 @@ import java.util.List;
  */
 public interface DependenciesHelper {
     List<Dependency> retrievePublishedDependencies(String resolvePattern) throws IOException, InterruptedException;
+    void setFlatDownload(boolean flat);
 }
