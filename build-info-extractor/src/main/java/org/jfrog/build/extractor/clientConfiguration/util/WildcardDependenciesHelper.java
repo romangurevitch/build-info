@@ -16,12 +16,17 @@ public class WildcardDependenciesHelper implements DependenciesHelper {
     private Log log;
     private String artifactoryUrl;
     private String target;
+    private String props;
+    private boolean recursive;
 
     public WildcardDependenciesHelper(DependenciesDownloader downloader, String artifactoryUrl, String target, Log log) {
         this.downloader = downloader;
         this.log = log;
         this.artifactoryUrl = artifactoryUrl;
         this.target = target;
+
+        this.recursive = false;
+        this.props = "";
     }
 
     public String getArtifactoryUrl() {
@@ -40,17 +45,19 @@ public class WildcardDependenciesHelper implements DependenciesHelper {
         this.target = target;
     }
 
+    public void setProps(String props) {
+        this.props = props;
+    }
+
+    public void setRecursive(boolean recursive) {
+        this.recursive = recursive;
+    }
+
     @Override
     public List<Dependency> retrievePublishedDependencies(String searchPattern)
             throws IOException, InterruptedException {
         DependenciesHelper dependenciesHelper = new AqlDependenciesHelper(downloader, artifactoryUrl, target, log);
-        return dependenciesHelper.retrievePublishedDependencies(buildAqlSearchQuery(searchPattern, false, ""));
-    }
-
-    public List<Dependency> retrievePublishedDependencies(String searchPattern, boolean recursive, String props)
-            throws IOException, InterruptedException {
-        DependenciesHelper dependenciesHelper = new AqlDependenciesHelper(downloader, artifactoryUrl, target, log);
-        return dependenciesHelper.retrievePublishedDependencies(buildAqlSearchQuery(searchPattern, recursive, props));
+        return dependenciesHelper.retrievePublishedDependencies(buildAqlSearchQuery(searchPattern, this.recursive, this.props));
     }
 
     @Override
