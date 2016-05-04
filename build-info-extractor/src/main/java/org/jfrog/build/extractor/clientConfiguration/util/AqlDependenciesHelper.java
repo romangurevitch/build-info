@@ -37,8 +37,13 @@ public class AqlDependenciesHelper implements DependenciesHelper {
         if (StringUtils.isBlank(resolvePattern)) {
             return Collections.emptyList();
         }
+        Set<DownloadableArtifact> downloadableArtifacts = collectArtifactsToDownload(resolvePattern);
+        return downloadDependencies(downloadableArtifacts);
+    }
+
+    public List<Dependency> downloadDependencies(Set<DownloadableArtifact> downloadableArtifacts) throws IOException {
         log.info("Beginning to resolve Build Info published dependencies.");
-        List<Dependency> dependencies = downloader.download(collectArtifactsToDownload(resolvePattern));
+        List<Dependency> dependencies = downloader.download(downloadableArtifacts);
         log.info("Finished resolving Build Info published dependencies.");
         return dependencies;
     }
@@ -48,7 +53,7 @@ public class AqlDependenciesHelper implements DependenciesHelper {
         this.downloader.setFlatDownload(flat);
     }
 
-    private Set<DownloadableArtifact> collectArtifactsToDownload(String aql) {
+    public Set<DownloadableArtifact> collectArtifactsToDownload(String aql) {
         Set<DownloadableArtifact> downloadableArtifacts = Sets.newHashSet();
         try{
             AqlSearchResult aqlSearchResult = downloader.getClient().searchArtifactsByAql(aql);
@@ -56,7 +61,7 @@ public class AqlDependenciesHelper implements DependenciesHelper {
             for (AqlSearchResult.SearchEntry searchEntry : searchResults) {
                 downloadableArtifacts.add(new DownloadableArtifact(StringUtils.stripEnd(artifactoryUrl, "/") + "/" + searchEntry.getRepo(), target, searchEntry.getPath() + "/" + searchEntry.getName(), "", "", PatternType.NORMAL));
             }
-        } catch (IOException e){
+        } catch (IOException e) {
             log.info("Failed to execute aql search");
         } finally {
             return downloadableArtifacts;

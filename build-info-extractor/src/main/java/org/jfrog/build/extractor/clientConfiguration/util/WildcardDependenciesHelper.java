@@ -1,12 +1,15 @@
 package org.jfrog.build.extractor.clientConfiguration.util;
 
+import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Dependency;
-import org.jfrog.build.api.dependency.BuildDependency;
+import org.jfrog.build.api.dependency.DownloadableArtifact;
 import org.jfrog.build.api.util.Log;
-
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Created by Tamirh on 25/04/2016.
@@ -56,8 +59,22 @@ public class WildcardDependenciesHelper implements DependenciesHelper {
     @Override
     public List<Dependency> retrievePublishedDependencies(String searchPattern)
             throws IOException, InterruptedException {
-        DependenciesHelper dependenciesHelper = new AqlDependenciesHelper(downloader, artifactoryUrl, target, log);
-        return dependenciesHelper.retrievePublishedDependencies(buildAqlSearchQuery(searchPattern, this.recursive, this.props));
+        if (StringUtils.isBlank(searchPattern)) {
+            return Collections.emptyList();
+        }
+        AqlDependenciesHelper dependenciesHelper = new AqlDependenciesHelper(downloader, artifactoryUrl, target, log);
+        Set<DownloadableArtifact> downloadableArtifacts = dependenciesHelper.collectArtifactsToDownload(buildAqlSearchQuery(searchPattern, this.recursive, this.props));
+        replaceTargetPlaceholders(searchPattern, downloadableArtifacts);
+        return dependenciesHelper.downloadDependencies(downloadableArtifacts);
+    }
+
+    private void replaceTargetPlaceholders(String searchPattern, Set<DownloadableArtifact> downloadableArtifacts) {
+        Pattern pattern = Pattern.compile(PlaceholderReplacmentUtils.pathToRegExp(searchPattern));
+        for (DownloadableArtifact artifact: downloadableArtifacts) {
+            String fullRepoUrl = artifact.getRepoUrl();
+            String repoName = fullRepoUrl.substring(fullRepoUrl.lastIndexOf("/") + 1);
+            artifact.setTargetDirPath(PlaceholderReplacmentUtils.reformatRegexp(repoName + "/" + artifact.getFilePath(), target, pattern));
+        }
     }
 
     @Override
@@ -114,7 +131,7 @@ public class WildcardDependenciesHelper implements DependenciesHelper {
         if (pattern.endsWith("/")) {
             pattern += "*";
         }
-        return pattern;
+        return pattern.replaceAll("[()]", "");
     }
 
     private String buildPropsQuery(String props) {
