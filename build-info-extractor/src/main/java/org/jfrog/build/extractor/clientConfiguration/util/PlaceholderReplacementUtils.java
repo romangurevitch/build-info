@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 /**
  * Created by Tamirh on 04/05/2016.
  */
-public class PlaceholderReplacmentUtils {
+public class PlaceholderReplacementUtils {
 
     public static String reformatRegexp(String sourceString, String destString, Pattern regexPattern) {
         String target = destString;

@@ -69,11 +69,11 @@ public class WildcardDependenciesHelper implements DependenciesHelper {
     }
 
     private void replaceTargetPlaceholders(String searchPattern, Set<DownloadableArtifact> downloadableArtifacts) {
-        Pattern pattern = Pattern.compile(PlaceholderReplacmentUtils.pathToRegExp(searchPattern));
+        Pattern pattern = Pattern.compile(PlaceholderReplacementUtils.pathToRegExp(searchPattern));
         for (DownloadableArtifact artifact: downloadableArtifacts) {
             String fullRepoUrl = artifact.getRepoUrl();
             String repoName = fullRepoUrl.substring(fullRepoUrl.lastIndexOf("/") + 1);
-            artifact.setTargetDirPath(PlaceholderReplacmentUtils.reformatRegexp(repoName + "/" + artifact.getFilePath(), target, pattern));
+            artifact.setTargetDirPath(PlaceholderReplacementUtils.reformatRegexp(repoName + "/" + artifact.getFilePath(), target, pattern));
         }
     }
 
