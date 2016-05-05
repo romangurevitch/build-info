@@ -1,6 +1,5 @@
 package org.jfrog.build.extractor.clientConfiguration.util;
 
-import javafx.util.Pair;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.dependency.DownloadableArtifact;
@@ -10,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -79,9 +79,9 @@ public class WildcardDependenciesHelper implements DependenciesHelper {
             } else {
                 String targetAfterReplacement = PlaceholderReplacementUtils.reformatRegexp(repoName + "/" + artifact.getFilePath(),
                         target, pattern);
-                Pair<String,String> targetFileName = PlaceholderReplacementUtils.replaceFilesName(targetAfterReplacement, artifact.getRelativeDirPath());
-                artifact.setRelativeDirPath(targetFileName.getValue());
-                artifact.setTargetDirPath(targetFileName.getKey());
+                Map<String,String> targetFileName = PlaceholderReplacementUtils.replaceFilesName(targetAfterReplacement, artifact.getRelativeDirPath());
+                artifact.setRelativeDirPath(targetFileName.get("srcPath"));
+                artifact.setTargetDirPath(targetFileName.get("targetPath"));
             }
         }
     }

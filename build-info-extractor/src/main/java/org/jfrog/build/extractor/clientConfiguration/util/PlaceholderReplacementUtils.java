@@ -1,10 +1,10 @@
 package org.jfrog.build.extractor.clientConfiguration.util;
 
-import javafx.util.Pair;
 import org.apache.commons.lang.StringUtils;
-
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Map;
 
 /**
  * Created by Tamirh on 04/05/2016.
@@ -48,15 +48,17 @@ public class PlaceholderReplacementUtils {
      * @pre targetPath and srcPath are not empty.
      * @pre targetPath Contains "/"
      * @param targetPath the path which the file name will be taken targetDir/targetPath/targetFileName
-     * @param srcPath the path which the file name will be replace srcDir/srcPath/srcFileName
-     * @return return pair of the target without the file name and the srcPath with the new file name
-     * <targetDir/targetPath, srcDir/srcPath/targetFileName>
+     * @param srcPath    the path which the file name will be replace srcDir/srcPath/srcFileName
+     * @return           map with the new targetPath and srcPath as values.
      */
-    public static Pair<String,String> replaceFilesName(String targetPath, String srcPath) {
+    public static Map<String,String> replaceFilesName(String targetPath, String srcPath) {
         String targetDirPath = StringUtils.substringBeforeLast(targetPath, "/");
         String targetFileName = StringUtils.substringAfterLast(targetPath, "/");
-        return new Pair<String, String>(targetDirPath, srcPath.contains("/") ?
+        Map<String,String> result = new HashMap<String, String>();
+        result.put("targetPath", targetDirPath);
+        result.put("srcPath", srcPath.contains("/") ?
                 StringUtils.substringBeforeLast(srcPath, "/") + "/" + targetFileName :
                 targetFileName);
+        return result;
     }
 }
