@@ -201,6 +201,56 @@ public class PublishedItemsHelper {
         return filePathsMap;
     }
 
+
+    /**
+     * Building a multi map of target paths mapped to their files using wildcard pattern.
+     *
+     * @param checkoutDir the base directory of which to calculate the given source ant pattern
+     * @param pattern     the Ant pattern to calculate the files from
+     * @param targetPath  the target path for deployment of a file
+     * @return a Multimap containing the targets as keys and the files as values
+     * @throws IOException in case of any file system exception
+     */
+    public static Multimap<String, File> wildCardBuildPublishingData(File checkoutDir, String pattern, String targetPath, boolean flat, boolean isRecursive)
+            throws IOException {
+        Multimap<String, File> filePathsMap = HashMultimap.create();
+        Pattern regexPattern = Pattern.compile(PlaceholderReplacementUtils.pathToRegExp(pattern));
+        String simplePattern = pattern.replaceAll("[()]", "");
+
+        Pattern findFilesPattern = null;
+        List<File> files = new ArrayList<File>();
+
+        if (isRecursive) {
+            findFilesPattern = Pattern.compile(PlaceholderReplacementUtils.pathToRegExp(simplePattern));
+        } else {
+            findFilesPattern = Pattern.compile(PlaceholderReplacementUtils.wildcardPatternToRegex(simplePattern));
+        }
+
+        collectMatchedFiles(checkoutDir, checkoutDir, findFilesPattern, files);
+
+        for (File file : files) {
+            String fileTargetPath = targetPath;
+            String path = "";
+            String fileName = "";
+
+            if (!StringUtils.endsWith(fileTargetPath, "/")) {
+                fileName = StringUtils.substringAfterLast(fileTargetPath, "/");
+                path = StringUtils.substringBeforeLast(fileTargetPath, "/");
+            } else {
+                path = targetPath;
+            }
+
+            if (!flat) {
+                fileTargetPath = calculateFileTargetPath(checkoutDir, file, path);
+            }
+
+            fileTargetPath = PlaceholderReplacementUtils.reformatRegexp(getRelativePath(checkoutDir, file), fileTargetPath, regexPattern);
+            filePathsMap.put(fileTargetPath, file);
+        }
+        return filePathsMap;
+
+    }
+
     private static String calculateFileTargetPath(File patternDir, File file, String targetPath) {
         String relativePath = getRelativePath(patternDir, file);
         relativePath = stripFileNameFromPath(relativePath);
@@ -462,9 +512,22 @@ public class PublishedItemsHelper {
     /**
      * Calculates the target deployment path of an artifact by it's name
      *
+     * @param targetPattern a wildcard pattern of the target path
+     * @param artifactFile  the artifact file to calculate target deployment path for
+     * @return the calculated target path (supports file renaming).
+     */
+    public static String wildcardCalculateTargetPath(String targetPattern, File artifactFile) {
+        if (targetPattern.endsWith("/") || targetPattern.equals("")) {
+            return targetPattern + calculateTargetRelativePath(artifactFile);
+        }
+        return targetPattern;
+    }
+
+    /**
+     * Calculates the target deployment path of an artifact by it's name
+     *
      * @param targetPattern an Ant pattern of the target path
      * @param artifactFile  the artifact file to calculate target deployment path for
-     * @param rootDir       the root dir to calculate relativity to
      * @return the calculated target path
      */
     public static String calculateTargetPath(String targetPattern, File artifactFile) {
