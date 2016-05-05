@@ -1,5 +1,6 @@
 package org.jfrog.build.extractor.clientConfiguration.util;
 
+import javafx.util.Pair;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.dependency.DownloadableArtifact;
@@ -70,10 +71,18 @@ public class WildcardDependenciesHelper implements DependenciesHelper {
 
     private void replaceTargetPlaceholders(String searchPattern, Set<DownloadableArtifact> downloadableArtifacts) {
         Pattern pattern = Pattern.compile(PlaceholderReplacementUtils.pathToRegExp(searchPattern));
-        for (DownloadableArtifact artifact: downloadableArtifacts) {
-            String fullRepoUrl = artifact.getRepoUrl();
-            String repoName = fullRepoUrl.substring(fullRepoUrl.lastIndexOf("/") + 1);
-            artifact.setTargetDirPath(PlaceholderReplacementUtils.reformatRegexp(repoName + "/" + artifact.getFilePath(), target, pattern));
+        for (DownloadableArtifact artifact : downloadableArtifacts) {
+            String repoName = StringUtils.substringAfterLast(artifact.getRepoUrl(), "/");
+            if (target.endsWith("/")) {
+                artifact.setTargetDirPath(PlaceholderReplacementUtils.reformatRegexp(repoName + "/" + artifact.getFilePath(),
+                        target, pattern));
+            } else {
+                String targetAfterReplacement = PlaceholderReplacementUtils.reformatRegexp(repoName + "/" + artifact.getFilePath(),
+                        target, pattern);
+                Pair<String,String> targetFileName = PlaceholderReplacementUtils.replaceFilesName(targetAfterReplacement, artifact.getRelativeDirPath());
+                artifact.setRelativeDirPath(targetFileName.getValue());
+                artifact.setTargetDirPath(targetFileName.getKey());
+            }
         }
     }
 

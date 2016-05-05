@@ -59,7 +59,8 @@ public class AqlDependenciesHelper implements DependenciesHelper {
             AqlSearchResult aqlSearchResult = downloader.getClient().searchArtifactsByAql(aql);
             List<AqlSearchResult.SearchEntry> searchResults = aqlSearchResult.getResults();
             for (AqlSearchResult.SearchEntry searchEntry : searchResults) {
-                downloadableArtifacts.add(new DownloadableArtifact(StringUtils.stripEnd(artifactoryUrl, "/") + "/" + searchEntry.getRepo(), target, searchEntry.getPath() + "/" + searchEntry.getName(), "", "", PatternType.NORMAL));
+                String path = searchEntry.getPath().equals(".") ? "" : searchEntry.getPath() + "/";
+                downloadableArtifacts.add(new DownloadableArtifact(StringUtils.stripEnd(artifactoryUrl, "/") + "/" + searchEntry.getRepo(), target, path + searchEntry.getName(), "", "", PatternType.NORMAL));
             }
         } catch (IOException e) {
             log.info("Failed to execute aql search");
