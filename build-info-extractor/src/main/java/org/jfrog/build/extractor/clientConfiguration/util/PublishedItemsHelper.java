@@ -226,7 +226,7 @@ public class PublishedItemsHelper {
             findFilesPattern = Pattern.compile(PlaceholderReplacementUtils.wildcardPatternToRegex(simplePattern));
         }
 
-        collectMatchedFiles(checkoutDir, checkoutDir, findFilesPattern, files);
+        collectMatchedFiles(checkoutDir, checkoutDir, findFilesPattern, files, isRecursive);
 
         for (File file : files) {
             String fileTargetPath = targetPath;
@@ -242,6 +242,8 @@ public class PublishedItemsHelper {
 
             if (!flat) {
                 fileTargetPath = calculateFileTargetPath(checkoutDir, file, path);
+                // handle win file system
+                fileTargetPath =  fileTargetPath.replace('\\', '/');
             }
 
             fileTargetPath = PlaceholderReplacementUtils.reformatRegexp(getRelativePath(checkoutDir, file), fileTargetPath, regexPattern);
@@ -444,6 +446,27 @@ public class PublishedItemsHelper {
                 }
             } else {
                 collectMatchedFiles(absoluteRoot, dir, pattern, files);
+            }
+        }
+    }
+    // We need also take into account if we are doing a recursive search
+    private static void collectMatchedFiles(File absoluteRoot, File root, Pattern pattern, List files, boolean recursive) {
+        File dirs[] = root.listFiles();
+        if (dirs == null) {
+            return;
+        }
+        File arr[] = dirs;
+        int len = arr.length;
+        for (int i = 0; i < len; i++) {
+            File dir = arr[i];
+            if (dir.isFile()) {
+                String path = getRelativePath(absoluteRoot, dir).replace("\\", "/");
+                //String path = absoluteRoot.getAbsolutePath();
+                if (pattern.matcher(path).matches() || (recursive && pattern.matcher(StringUtils.substringAfterLast(path, "/")).matches())) {
+                    files.add(dir);
+                }
+            } else {
+                collectMatchedFiles(absoluteRoot, dir, pattern, files, recursive);
             }
         }
     }
